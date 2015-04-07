@@ -1,0 +1,62 @@
+ros-indigo-ros-ethercat-model (0.2.0-0saucy) saucy; urgency=high
+
+  * Added shutdown-timeout=1.0 to improve controller shutdown time
+  * Check if a port has been defined before starting EtherCAT
+  * Check if an ethercat port has been defined
+  * Fix wait for calibration problem
+  * Add cmake function to enable rpath
+  * bug fixes in initialization
+  * added and registered JointCommandInterfaces
+  * added install directives
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Mon, 06 Apr 2015 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.8-0saucy) saucy; urgency=high
+
+
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Thu, 17 Jul 2014 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.7-0saucy) saucy; urgency=high
+
+
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Thu, 22 May 2014 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.6-0saucy) saucy; urgency=high
+
+
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Wed, 14 May 2014 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.5-0saucy) saucy; urgency=high
+
+
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Tue, 13 May 2014 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.4-0saucy) saucy; urgency=high
+
+
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Tue, 13 May 2014 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.3-0saucy) saucy; urgency=high
+
+
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Mon, 12 May 2014 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.2-0saucy) saucy; urgency=high
+
+
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Mon, 12 May 2014 23:00:00 -0000
+
+ros-indigo-ros-ethercat-model (0.1.1-0saucy) saucy; urgency=high
+
+  * first hydro release
+
+ -- Shadow Robot's software team <software@shadowrobot.com>  Sun, 11 May 2014 23:00:00 -0000
+
+
