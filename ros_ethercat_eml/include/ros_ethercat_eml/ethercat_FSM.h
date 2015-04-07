@@ -50,8 +50,13 @@ class EtherCAT_PD_Buffer;
 #include "ros_ethercat_eml/ethercat_slave_memory.h"
 
 /// EtherCAT State Machine Operations
+
 class EC_ESM_Ops
 {
+public:
+  void setRouter(EtherCAT_Router *_router);
+  EC_Logic * m_logic_instance;
+  EtherCAT_Router * m_router_instance;
 protected:
   /// Start MBX communication
   bool start_mbx_comm();
@@ -66,16 +71,18 @@ protected:
   /// Stop Output update
   bool stop_output_update();
 
-  protected:
+protected:
   /// Constructor
   /** @param a_SH pointer to slave handler
    */
-  EC_ESM_Ops(EtherCAT_SlaveHandler * a_SH);
+  EC_ESM_Ops(EtherCAT_SlaveHandler * a_SH,
+             EtherCAT_DataLinkLayer *_m_dll_instance,
+             EC_Logic *_m_logic_instance,
+             EtherCAT_PD_Buffer *_m_pdbuf_instance);
 
   EtherCAT_DataLinkLayer * m_dll_instance;
-  EC_Logic * m_logic_instance;
   EtherCAT_SlaveHandler * m_SH;
-  EtherCAT_Router * m_router_instance;
+
   EtherCAT_PD_Buffer * m_pdbuf_instance;
 
   /// Change state of Slave
@@ -94,6 +101,7 @@ class EC_ESM_SafeOpState;
 class EC_ESM_OpState;
 
 /// ESM State Interface class
+
 /** @todo The bootstrap state is currently not implemented
  */
 class EC_ESM_State
@@ -116,7 +124,7 @@ public:
    */
   virtual bool to_state(EC_ESM * a_ESM, EC_State a_state) = 0;
   virtual EC_State get_state() const = 0;
-  protected:
+protected:
   static EC_ESM_InitState initState;
   static EC_ESM_PreOpState preopState;
   static EC_ESM_SafeOpState safeopState;
@@ -124,6 +132,7 @@ public:
 };
 
 /// EtherCAT State Machine
+
 /** @todo Unexpected transitions in the state of the slave (via slaves
  application, only for complex slaves) are not dealt with for
  now...  This should probably be fixed using a special mailbox msg or a polling
@@ -139,6 +148,11 @@ class EC_ESM : public EC_ESM_Ops
   friend class EC_ESM_OpState;
 
 public:
+  EC_ESM(EtherCAT_SlaveHandler * a_SH,
+         EtherCAT_DataLinkLayer *_m_dll_instance,
+         EC_Logic *_m_logic_instance,
+         EtherCAT_PD_Buffer *_m_pdbuf_instance);
+
   /// State Transitions
   /** @param a_state state to go to. Possibilities are
    - EC_INIT_STATE = 0x01,
@@ -151,7 +165,6 @@ public:
   {
     return (m_esm_state->to_state(this, a_state));
   }
-
   EC_State get_state()
   {
     return m_esm_state->get_state();
@@ -163,11 +176,6 @@ protected:
   {
     m_esm_state = a_esm_state;
   }
-
-  /// Constructor
-  /** @param a_SH pointer to Slave Handler this FSM concerns
-   */
-  EC_ESM(EtherCAT_SlaveHandler * a_SH);
 
 private:
   EC_ESM_State * m_esm_state;

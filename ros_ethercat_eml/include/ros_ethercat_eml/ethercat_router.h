@@ -30,7 +30,7 @@
 //	Automation GmbH, Eiserstrasse 5, D-33415 Verl, Germany.
 //===========================================================================
 
- 
+
 #ifndef __ethercat_router__
 #define __ethercat_router__
 
@@ -42,18 +42,22 @@ class EtherCAT_SlaveHandler;
 class EtherCAT_MbxMsg;
 
 /// EtherCAT Router component
+
 class EtherCAT_Router
 {
- public:
-  /// Singleton
-  static EtherCAT_Router * instance();
-
+public:
+  EtherCAT_Router(EtherCAT_AL *_m_al_instance,
+                  EC_Logic *_m_logic_instance,
+                  EtherCAT_DataLinkLayer *_m_dll_instance);
   /// Start routing
   void start();
   /// Stop routing
   void stop();
   /// Router running?
-  bool is_running() const { return (EtherCAT_Router::m_is_running != 0); }
+  bool is_running() const
+  {
+    return m_is_running;
+  }
 
   /// Actual routing code
   /** @todo  This method should not be public, but since it is used in
@@ -69,21 +73,17 @@ class EtherCAT_Router
       start_mbx_communication() call of slaves---configure an FMMU of
       the slave which listens to the written bit of sync manager 0.
    */
-  void route(void) const;  
- protected:
-  EtherCAT_Router();
-  
- private:
+  void route(void) const;
+
   /// Pointer to AL instance
   EtherCAT_AL * m_al_instance;
+private:
   /// Pointer to EC_Logic
   EC_Logic * m_logic_instance;
   /// Pointer to DLL instance
   EtherCAT_DataLinkLayer * m_dll_instance;
-  
-  static EtherCAT_Router * m_instance;
   /// Usage counter
-  unsigned int m_is_running;
+  bool m_is_running;
 
   /// Check and deliver post from slave
   /** Check if slave posted something in its mailbox and if positive,
@@ -91,17 +91,16 @@ class EtherCAT_Router
       @param sh Slave Handler to query
       @return true if nothing went wrong (i.e. nothing was posted, or
       no error occurred during routing
-  */
+   */
   bool check_mbx(const EtherCAT_SlaveHandler * sh) const;
-  
+
   /// Post a msg from a certain slave
   /** @param msg mbx_msg to be posted
       @param from_sh "poster" of the msg (The EtherCAT protocol does
       not provide a From: header in its messages)
       @return true if everything went fine
    */
-  bool post_mbxmsg(EtherCAT_MbxMsg * msg, 
-		   const EtherCAT_SlaveHandler * from_sh) const;
+  bool post_mbxmsg(EtherCAT_MbxMsg * msg, const EtherCAT_SlaveHandler * from_sh) const;
 
 };
 

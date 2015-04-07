@@ -62,14 +62,13 @@ class JointStatistics
 {
 public:
   JointStatistics() :
-      min_position_(0), max_position_(0),
-          max_abs_velocity_(0.0), max_abs_effort_(0.0),
-          violated_limits_(false), initialized_(false)
+    min_position_(0), max_position_(0),
+    max_abs_velocity_(0.0), max_abs_effort_(0.0),
+    violated_limits_(false), initialized_(false)
   {
   }
 
   void update(JointState *jnt);
-
   void reset()
   {
     double tmp = min_position_;
@@ -101,8 +100,7 @@ public:
     getLimits(effort_low, effort_high);
 
     // limit the commanded effort based on position, velocity and effort limits
-    commanded_effort_ =
-        std::min(std::max(commanded_effort_, effort_low), effort_high);
+    commanded_effort_ = std::min(std::max(commanded_effort_, effort_low), effort_high);
   }
 
   /// Returns the safety effort limits given the current position and velocity.
@@ -122,19 +120,16 @@ public:
     effort_low = -joint_->limits->effort;
 
     // enforce position bounds on rotary and prismatic joints that are calibrated
-    if (calibrated_
-        && (joint_->type == urdf::Joint::REVOLUTE || joint_->type == urdf::Joint::PRISMATIC))
+    if (calibrated_ && (joint_->type == urdf::Joint::REVOLUTE || joint_->type == urdf::Joint::PRISMATIC))
     {
       // Computes the velocity bounds based on the absolute limit and the
       // proximity to the joint limit.
-      vel_high = std::max(
-          -joint_->limits->velocity,
-          std::min(joint_->limits->velocity,
-                   -joint_->safety->k_position * (position_ - joint_->safety->soft_upper_limit)));
-      vel_low = std::min(
-          joint_->limits->velocity,
-          std::max(-joint_->limits->velocity,
-                   -joint_->safety->k_position * (position_ - joint_->safety->soft_lower_limit)));
+      vel_high = std::max(-joint_->limits->velocity,
+                          std::min(joint_->limits->velocity,
+                                   -joint_->safety->k_position * (position_ - joint_->safety->soft_upper_limit)));
+      vel_low = std::min(joint_->limits->velocity,
+                         std::max(-joint_->limits->velocity,
+                                  -joint_->safety->k_position * (position_ - joint_->safety->soft_lower_limit)));
     }
 
     // Computes the effort bounds based on the velocity and effort bounds.
@@ -155,16 +150,22 @@ public:
   /// The joint velocity in radians/sec or meters/sec (read-only variable)
   double velocity_;
 
-  /// The measured joint effort in Nm or N (read-only variable)
-  double measured_effort_;
+  /// The joint effort in Nm or N (read-only variable)
+  double effort_;
 
   // joint statistics
   JointStatistics joint_statistics_;
 
+  /// The position the joint should move to in radians or meters (write-to variable)
+  double commanded_position_;
+
+  /// The velocity the joint should move with in radians/sec or meters/sec (write-to variable)
+  double commanded_velocity_;
+
   /// The effort the joint should apply in Nm or N (write-to variable)
   double commanded_effort_;
 
-  /// Bool to indicate if the joint has been calibrated or not
+  /// Indicates if the joint has been calibrated or not
   bool calibrated_;
 
   /// The position of the optical flag that was used to calibrate this joint
@@ -172,23 +173,28 @@ public:
 
   /// Constructor
   JointState() :
-      position_(0.0), velocity_(0.0), measured_effort_(0.0),
-          commanded_effort_(0.0), calibrated_(false), reference_position_(0.0)
+    position_(0.0),
+    velocity_(0.0),
+    effort_(0.0),
+    commanded_position_(0.0),
+    commanded_velocity_(0.0),
+    commanded_effort_(0.0),
+    calibrated_(false),
+    reference_position_(0.0)
   {
   }
 };
-
 inline void JointStatistics::update(JointState *jnt)
 {
   if (initialized_)
   {
     if (jnt->joint_->safety && jnt->joint_->limits
-        && (fabs(jnt->commanded_effort_) > fabs(jnt->measured_effort_)))
+        && (fabs(jnt->commanded_effort_) > fabs(jnt->effort_)))
       violated_limits_ = true;
     min_position_ = fmin(jnt->position_, min_position_);
     max_position_ = fmax(jnt->position_, max_position_);
     max_abs_velocity_ = fmax(fabs(jnt->velocity_), max_abs_velocity_);
-    max_abs_effort_ = fmax(fabs(jnt->measured_effort_), max_abs_effort_);
+    max_abs_effort_ = fmax(fabs(jnt->effort_), max_abs_effort_);
   }
   else
   {

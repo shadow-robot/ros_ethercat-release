@@ -51,13 +51,12 @@
 
 namespace ros_ethercat_model
 {
+
 /** \brief This class provides the controllers with an interface to the robot state
  *
  * Most controllers that need the robot state should use the joint states, to get
  * access to the joint position/velocity/effort, and to command the effort a joint
  * should apply. Controllers can get access to the hard realtime clock through current_time_
- *
- * A CustomHW class to add arbitrary hardware devices
  */
 class RobotState : public hardware_interface::HardwareInterface
 {
@@ -76,34 +75,25 @@ public:
       if (!robot_model_.initXml(root))
         throw std::runtime_error("Failed to load robot_model_");
 
-      for (TiXmlElement *xit = root->FirstChildElement("transmission"); xit; xit = xit->NextSiblingElement("transmission"))
+      for (std::map<std::string, boost::shared_ptr<urdf::Joint> >::const_iterator it = robot_model_.joints_.begin();
+           it != robot_model_.joints_.end();
+           ++it)
       {
-        std::string type(xit->Attribute("type"));
+        // we are only loading joints that can be controlled
+        if (it->second->type == urdf::Joint::PRISMATIC || it->second->type == urdf::Joint::REVOLUTE)
+          joint_states_[it->first].joint_ = it->second;
+      }
+
+      for (TiXmlElement *xit = root->FirstChildElement("transmission");
+           xit;
+           xit = xit->NextSiblingElement("transmission"))
+      {
+        std::string type = xit->Attribute("type");
 
         Transmission *t = transmission_loader_.createUnmanagedInstance(type);
         if (!t || !t->initXml(xit, this))
           throw std::runtime_error(std::string("Failed to initialize transmission type: ") + type);
         transmissions_.push_back(t);
-
-        std::vector<Actuator*> acts;
-        for (std::vector<std::string>::iterator it = t->actuator_names_.begin(); it != t->actuator_names_.end(); ++it)
-        {
-          Actuator *act = getActuator(*it);
-          if (!act)
-            throw std::runtime_error(std::string("Transmission ") + t->name_ + " contains undefined actuator " + *it);
-          acts.push_back(act);
-        }
-        transmissions_in_.push_back(acts);
-
-        std::vector<JointState*> stats;
-        for (std::vector<std::string>::iterator it = t->joint_names_.begin(); it != t->joint_names_.end(); ++it)
-        {
-          if (!robot_model_.getJoint(*it))
-            throw std::runtime_error(std::string("Failed to find in robot model transmission's joint named: ") + type);
-          joint_states_[*it].joint_ = robot_model_.getJoint(*it);
-          stats.push_back(&joint_states_[*it]);
-        }
-        transmissions_out_.push_back(stats);
       }
     }
     catch (const std::runtime_error &ex)
@@ -112,24 +102,27 @@ public:
     }
   }
 
-  /// Propagete the actuator positions, through the transmissions, to the joint positions
+  /// Propagate the actuator positions, through the transmissions, to the joint positions
   void propagateActuatorPositionToJointPosition()
   {
     for (size_t i = 0; i < transmissions_.size(); ++i)
-      transmissions_[i].propagatePosition(transmissions_in_[i], transmissions_out_[i]);
+      transmissions_[i].propagatePosition();
   }
 
-  /// Propagete the joint efforts, through the transmissions, to the actuator efforts
+  /// Propagate the joint efforts, through the transmissions, to the actuator efforts
   void propagateJointEffortToActuatorEffort()
   {
     for (size_t i = 0; i < transmissions_.size(); ++i)
-      transmissions_[i].propagateEffort(transmissions_out_[i], transmissions_in_[i]);
+      transmissions_[i].propagateEffort();
   }
 
   /// get an actuator by actuator name or NULL on failure
   Actuator* getActuator(const std::string &name)
   {
-    return actuators_.count(name) ? &actuators_[name] : NULL;
+    for (size_t i = 0; i < transmissions_.size(); ++i)
+      if (transmissions_[i].actuator_->name_ == name)
+        return transmissions_[i].actuator_;
+    return NULL;
   }
 
   /// Get Custom Hardware device by name or NULL on failure
@@ -144,6 +137,7 @@ public:
     return joint_states_.count(name) ? &joint_states_[name] : NULL;
   }
 
+  /// return the current time of the control loop
   ros::Time getTime()
   {
     return current_time_;
@@ -152,15 +146,8 @@ public:
   /// The time at which the commands were sent to the hardware
   ros::Time current_time_;
 
-  // for each transmission cache pointers to actuators and joints that it connects
-  std::vector<std::vector<Actuator*> > transmissions_in_;
-  std::vector<std::vector<JointState*> > transmissions_out_;
-
   /// The joint states mapped to the joint names
-  boost::unordered_map<std::string, JointState> joint_states_;
-
-  /// The actuators mapped to their names
-  boost::ptr_unordered_map<std::string, Actuator> actuators_;
+  boost::ptr_unordered_map<std::string, JointState> joint_states_;
 
   /// Custom hardware structures mapped to their names
   boost::ptr_unordered_map<std::string, CustomHW> custom_hws_;
@@ -168,7 +155,10 @@ public:
   /// The kinematic/dynamic model of the robot
   urdf::Model robot_model_;
 
+  /// the robot's transmissions
   boost::ptr_vector<Transmission> transmissions_;
+
+  /// the transmission's loader
   pluginlib::ClassLoader<Transmission> transmission_loader_;
 };
 }

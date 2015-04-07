@@ -39,7 +39,7 @@
 
 bool EthercatDirectCom::txandrx_once(struct EtherCAT_Frame * frame)
 {
-  assert(frame!=NULL);
+  assert(frame != NULL);
   int handle = dll_->tx(frame);
   if (handle < 0)
     return false;
@@ -52,13 +52,13 @@ bool EthercatDirectCom::txandrx(struct EtherCAT_Frame * frame)
 }
 
 EthercatOobCom::EthercatOobCom(struct netif *ni) :
-    ni_(ni),
-        state_(IDLE),
-        frame_(NULL),
-        handle_(-1),
-        line_(0)
+  ni_(ni),
+  state_(IDLE),
+  frame_(NULL),
+  handle_(-1),
+  line_(0)
 {
-  assert(ni_!=NULL);
+  assert(ni_ != NULL);
 
   pthread_mutexattr_t mutex_attr;
   int error = pthread_mutexattr_init(&mutex_attr);
@@ -130,6 +130,7 @@ bool EthercatOobCom::unlock(unsigned line)
 
 // OOB replacement for netif->txandrx()
 // Returns true for success, false for dropped packet
+
 bool EthercatOobCom::txandrx_once(struct EtherCAT_Frame * frame)
 {
   assert(frame != NULL);
@@ -145,11 +146,12 @@ bool EthercatOobCom::txandrx_once(struct EtherCAT_Frame * frame)
   frame_ = frame;
   state_ = READY_TO_SEND;
 
-  // RT control loop will send frame 
+  // RT control loop will send frame
   do
   {
     pthread_cond_wait(&busy_cond_, &mutex_);
-  } while (state_ != WAITING_TO_RECV);
+  }
+  while (state_ != WAITING_TO_RECV);
 
   // Packet has been sent, wait for recv
   bool success = false;
@@ -179,6 +181,7 @@ bool EthercatOobCom::txandrx(struct EtherCAT_Frame * frame)
 }
 
 // Called by RT control loop to send oob data
+
 void EthercatOobCom::tx()
 {
   if (!trylock(__LINE__))
@@ -187,7 +190,7 @@ void EthercatOobCom::tx()
   if (state_ == READY_TO_SEND)
   {
     // Packet is in need of being sent
-    assert(frame_!=NULL);
+    assert(frame_ != NULL);
     handle_ = ni_->tx(frame_, ni_);
     state_ = WAITING_TO_RECV;
     pthread_cond_signal(&busy_cond_);

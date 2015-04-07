@@ -40,30 +40,40 @@ EtherCAT_SlaveHandler::EtherCAT_SlaveHandler(uint16_t a_ring_position,
                                              EC_FixedStationAddress a_station_address,
                                              EtherCAT_FMMU_Config * a_fmmu_config,
                                              EtherCAT_PD_Config * a_pd_config,
-                                             EtherCAT_MbxConfig * a_mbx_config)
-:
-    EC_ESM(this),
-        EtherCAT_SlaveConfig(a_product_code,
-                             a_revision,
-                             a_station_address,
-                             a_fmmu_config,
-                             a_pd_config,
-                             a_mbx_config),
-        m_ring_position(a_ring_position),
-        m_serial(a_serial),
-        m_mbx_counter(0)
+                                             EtherCAT_MbxConfig * a_mbx_config,
+                                             EtherCAT_DataLinkLayer *_m_dll_instance,
+                                             EC_Logic *_m_logic_instance,
+                                             EtherCAT_PD_Buffer *_m_pdbuf_instance) :
+  EC_ESM(this,
+         _m_dll_instance,
+         _m_logic_instance,
+         _m_pdbuf_instance),
+  EtherCAT_SlaveConfig(a_product_code,
+                       a_revision,
+                       a_station_address,
+                       a_fmmu_config,
+                       a_pd_config,
+                       a_mbx_config),
+  m_ring_position(a_ring_position),
+  m_serial(a_serial),
+  m_mbx_counter(0)
 {
 }
 
 EtherCAT_SlaveHandler::EtherCAT_SlaveHandler(uint16_t a_ring_position,
-                                             const EtherCAT_SlaveConfig * a_sconf,
-                                             uint32_t a_serial)
-:
-    EC_ESM(this),
-        EtherCAT_SlaveConfig(*a_sconf),
-        m_ring_position(a_ring_position),
-        m_serial(a_serial),
-        m_mbx_counter(0)
+                                             EtherCAT_SlaveConfig * a_sconf,
+                                             uint32_t a_serial,
+                                             EtherCAT_DataLinkLayer *_m_dll_instance,
+                                             EC_Logic *_m_logic_instance,
+                                             EtherCAT_PD_Buffer *_m_pdbuf_instance) :
+  EC_ESM(this,
+         _m_dll_instance,
+         _m_logic_instance,
+         _m_pdbuf_instance),
+  EtherCAT_SlaveConfig(*a_sconf),
+  m_ring_position(a_ring_position),
+  m_serial(a_serial),
+  m_mbx_counter(0)
 {
 }
 

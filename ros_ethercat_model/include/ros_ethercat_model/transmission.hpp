@@ -38,10 +38,12 @@
 #define ROS_ETHERCAT_MODEL_TRANSMISSION_H
 
 #include <tinyxml.h>
+#include <algorithm>
 #include "ros_ethercat_model/joint.hpp"
 #include "ros_ethercat_model/hardware_interface.hpp"
 
-namespace ros_ethercat_model {
+namespace ros_ethercat_model
+{
 
 class RobotState;
 
@@ -50,52 +52,40 @@ class Transmission
 public:
 
   /// Destructor
-  virtual ~Transmission() {}
+  virtual ~Transmission()
+  {
+    delete actuator_;
+  }
 
   /// Initializes the transmission from XML data
   virtual bool initXml(TiXmlElement *config, RobotState *robot)
   {
     const char *name = config->Attribute("name");
     name_ = name ? name : "";
-
-    //reading the joint name
-    TiXmlElement *jel = config->FirstChildElement("joint");
-    const char *joint_name = jel ? jel->Attribute("name") : NULL;
-    if (!joint_name)
-    {
-      ROS_ERROR("Transmission did not specify joint name");
-      return false;
-    }
-
-    joint_names_.push_back(joint_name);
-
     return true;
   }
 
   /// Uses encoder data to fill out joint position and velocities
-  virtual void propagatePosition(std::vector<Actuator*>&, std::vector<JointState*>&) = 0;
+  virtual void propagatePosition()
+  {
+  };
 
   /// Uses commanded joint efforts to fill out commanded motor currents
-  virtual void propagateEffort(std::vector<JointState*>&, std::vector<Actuator*>&) = 0;
+  virtual void propagateEffort()
+  {
+  };
 
   /// the name of the transmission
   std::string name_;
 
-  /**
-   * Specifies the names of the actuators that this transmission uses.
-   * In the propagate* methods, the order of actuators and joints in
-   * the parameters matches the order in actuator_names_ and in
-   * joint_names_.
-   */
-  std::vector<std::string> actuator_names_;
+  /// The state of the main joint that this transmission handles.
+  /// Child classes may add more joints if they need them.
+  /// JointState object owned by RobotState object.
+  JointState *joint_;
 
-  /**
-   * Specifies the names of the joints that this transmission uses.
-   * In the propagate* methods, the order of actuators and joints in
-   * the parameters matches the order in actuator_names_ and in
-   * joint_names_.
-   */
-  std::vector<std::string> joint_names_;
+  /// The actuator that this transmission handles.
+  /// Child classes may add more actuators if they need them.
+  Actuator *actuator_;
 };
 
 } // namespace ros_ethercat_model

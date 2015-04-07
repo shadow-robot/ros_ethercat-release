@@ -54,7 +54,7 @@ struct EthtoolStats
 struct InterfaceState
 {
   InterfaceState() :
-      up_(false), running_(false)
+    up_(false), running_(false)
   {
   }
   bool up_;
@@ -101,7 +101,7 @@ protected:
   //! Number of time master link went down
   unsigned lost_link_count_;
 
-  //! Orignal statistics counts when initialize() was called.
+  //! Original statistics counts when initialize() was called.
   EthtoolStats orig_stats_;
   InterfaceState last_state_;
 };

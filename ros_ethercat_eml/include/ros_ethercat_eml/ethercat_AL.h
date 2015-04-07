@@ -38,8 +38,8 @@
 // forward declaration
 class EtherCAT_DataLinkLayer;
 class EtherCAT_SlaveHandler;
-class EtherCAT_SlaveDb;
 class EC_FixedStationAddress;
+class EtherCAT_PD_Buffer;
 
 /// Convert ringpos2adp in case of autoincrement addressing;
 /** @param ringpos Position in the ring (counting starts from 0)
@@ -47,7 +47,7 @@ class EC_FixedStationAddress;
  */
 inline uint16_t ringpos2adp(uint16_t ringpos)
 {
-  return (uint16_t)(0x0000 - ringpos);
+  return (uint16_t) (0x0000 - ringpos);
 }
 
 /// Convert adp2ringpos in case of autoincrement addressing;
@@ -56,32 +56,30 @@ inline uint16_t ringpos2adp(uint16_t ringpos)
  */
 inline uint16_t adp2ringpos(uint16_t adp)
 {
-  return (uint16_t)(0x0000 - adp);
+  return (uint16_t) (0x0000 - adp);
 }
 
 /// EtherCAT "logic"
+
 /** @todo search better name for this
  */
 class EC_Logic
 {
 public:
-  /// this class is a singleton
-  static EC_Logic * instance();
+  EC_Logic() : m_wkc(0), m_idx(0)
+  {
+  }
+
   /// Get current idx
   uint8_t get_idx();
   /// Get wkc (normally always zero, not truly necessary)
   uint16_t get_wkc();
 
-  /// Constructor
-  EC_Logic();
-  /// Instance
-  static EC_Logic * m_instance;
   /// Working Counter
   const uint16_t m_wkc;
   /// Index (Increased with each frame the master sends)
   uint8_t m_idx;
 };
-
 inline uint8_t EC_Logic::get_idx()
 {
   return m_idx++;
@@ -92,15 +90,13 @@ inline uint16_t EC_Logic::get_wkc()
 }
 
 /// EtherCAT Master Application Layer
+
 class EtherCAT_AL
 {
   friend class EtherCAT_Router;
 
 public:
-  /// This class is a singleton
-  static EtherCAT_AL * instance();
-
-  /// Destructor
+  EtherCAT_AL(EtherCAT_DataLinkLayer *m_dll_instance, EC_Logic *m_logic_instance, EtherCAT_PD_Buffer *_pd_buffer_);
   ~EtherCAT_AL();
 
   /// Get pointer to slaveHandler
@@ -119,17 +115,25 @@ public:
     return m_num_slaves;
   }
 
-  /// Check the AL is ready (init was succesful)
+  /// Get an array of pointers to slaves
+  /** @return array of pointers to slaves
+   */
+  EtherCAT_SlaveHandler ** get_slaves()
+  {
+    return m_slave_handler;
+  }
+
+  /// Check the AL is ready (init was successful)
   /** @return true if ready
    */
 
   bool isReady();
 
-protected:
-  /// Constructor (protected)
-  EtherCAT_AL();
+  /// DLL Instance
+  EtherCAT_DataLinkLayer * m_dll_instance;
 
-  /// Init of EtherCAT network. 
+protected:
+  /// Init of EtherCAT network.
   /** Counts and identifies the number of slaves in the network, and
    resets the slaves configuration.
    @return true if success
@@ -137,7 +141,7 @@ protected:
   bool init(void);
 
   /// Scan the slave network, create the necessary slave Handlers
-  /** @return true if succes
+  /** @return true if success
    @todo if 2 slaves have the same product code and revision, they
    will get the same address!!
    */
@@ -154,18 +158,13 @@ protected:
   bool put_slaves_in_init(void);
 
 private:
-  /// Instance 
-  static EtherCAT_AL * m_instance;
-  /// DLL Instance
-  EtherCAT_DataLinkLayer * m_dll_instance;
   /// Using commonly idx
   EC_Logic * m_logic_instance;
 
   /// Pointer to the slave Handlers
   EtherCAT_SlaveHandler ** m_slave_handler;
 
-  /// Pointer to the slave database
-  EtherCAT_SlaveDb * m_slave_db;
+  EtherCAT_PD_Buffer *pd_buffer_;
 
   /// Get information from the SII (in Autoincrement mode)
   /** @param slave_adp address pointer of the slave to read in
@@ -179,7 +178,7 @@ private:
   /// Number of slaves in the setup
   unsigned int m_num_slaves;
 
-  /// Set is init is succesful
+  /// Set is init is successful
   bool m_ready;
 };
 

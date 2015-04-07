@@ -42,23 +42,24 @@ struct netif;
 #include <stdlib.h>
 
 #define ETHERCAT_DEVICE_NAME_MAX_LENGTH 256
-// Size of MAC adresses expressed as a number of bytes 
-#define MAC_ADDRESS_SIZE 6 
+// Size of MAC addresses expressed as a number of bytes
+#define MAC_ADDRESS_SIZE 6
 
 void if_attach(struct netif * netif);
 int framedump(const struct EtherCAT_Frame * frame, unsigned char * buffer, size_t bufferlength);
 int framebuild(struct EtherCAT_Frame * frame, const unsigned char * buffer);
 
-// Number of outstanding packets to keep track of 
+// Number of outstanding packets to keep track of
 #define PKT_LIST_SIZE 128
 
-// Number of buffers to hold recieved packets
+// Number of buffers to hold received packets
 #define BUF_LIST_SIZE 16
 
 // Should be < number of RX buffers
 #define MAX_UNCLAIMED_PACKETS (BUF_LIST_SIZE-1)
 
-// buffer to hold recieved packets
+// buffer to hold received packets
+
 struct pkt_buf
 {
   // True if the buffer is being used
@@ -72,6 +73,7 @@ struct pkt_buf
 //  1. has not received reply
 //      .... OR ....
 //  2. has not been claimed by higher level software
+
 struct outstanding_pkt
 {
   // whether this record is holding an outstanding packet or not
@@ -117,21 +119,22 @@ struct netif_counters
   uint64_t rx_dup_seqnum;
   uint64_t rx_dup_pkt;
   uint64_t rx_bad_order;
-  uint64_t rx_late_pkt;         // Count of all late packets
-  uint64_t sw_dropped;          // packets that were dropped by software (for testing purposes)
-  uint64_t rx_late_pkt_rtt_us;  // Round trip time (in microseconds) of last late packet arrival
+  uint64_t rx_late_pkt; // Count of all late packets
+  uint64_t sw_dropped; // packets that were dropped by software (for testing purposes)
+  uint64_t rx_late_pkt_rtt_us; // Round trip time (in microseconds) of last late packet arrival
   uint64_t rx_late_pkt_rtt_us_sum; // Sum of rtt's of all late packets (for calculating average)
 };
 
-/// Generic ethercat interface towards lower level drivers. 
+/// Generic ethercat interface towards lower level drivers.
+
 /** It should be readily re-implemented for different OSes such as
- RTAI, linux, ...     etc. (For the ease of porting the interface
+ RTAI, Linux, ...     etc. (For the ease of porting the interface
  is in C).
  */
 struct netif
 {
   /// Transmit and receive an EtherCAT frame
-  /** Implemented for ecos in low_level_txandrx() in 
+  /** Implemented for ecos in low_level_txandrx() in
    packages/io/eth/current/src/ethercatmaster/eth_drv.c
    and mapped in eth_drv_init()
    */
@@ -147,24 +150,24 @@ struct netif
    */
   int (*tx)(struct EtherCAT_Frame * frame, struct netif * netif);
 
-  /// Recieve frame
-  /** May block, returns true if correct frame is recieved 
+  /// Receive frame
+  /** May block, returns true if correct frame is received
    */
   bool (*rx)(struct EtherCAT_Frame * frame, struct netif * netif, int handle);
 
-  /// Drop frame 
+  /// Drop frame
   /** Like rx(), but does not fill in frame with result, useful for testing
    */
   bool (*drop)(struct EtherCAT_Frame * frame, struct netif * netif, int handle);
 
-  /// Recieve frame
-  /** Will not block, returns true if correct frame is recieved 
+  /// Receive frame
+  /** Will not block, returns true if correct frame is received
    */
   bool (*rx_nowait)(struct EtherCAT_Frame * frame, struct netif * netif, int handle);
 
   /// The MAC address
   unsigned char hwaddr[MAC_ADDRESS_SIZE];
-  /// Filedescriptor of the socket
+  /// File descriptor of the socket
   int socket_private;
 
   /// Counters for certain types of events (packet drops, invalid packets, etc)
@@ -173,7 +176,7 @@ struct netif
   /// Sequence number to put on next sent packet
   unsigned tx_seqnum;
 
-  /// Secuence number of more recently recieved packet
+  /// Sequence number of more recently received packet
   unsigned rx_seqnum;
 
   /// Outstanding pkt slot to use from next tx
@@ -186,7 +189,7 @@ struct netif
   // Number of tx'd packets that have not been rx'd yet
   unsigned unclaimed_packets;
 
-  /// List of buffers used for packet reception 
+  /// List of buffers used for packet reception
   struct pkt_buf buf_list[BUF_LIST_SIZE];
 
   // For thread safety: txandrx() can be called from multiple threads...
@@ -198,7 +201,7 @@ struct netif
   volatile bool stop;
   volatile bool is_stopped;
 
-  // Timeout for recieve in microseconds.
+  // Timeout for receive in microseconds.
   int timeout_us;
 
   // private variable
