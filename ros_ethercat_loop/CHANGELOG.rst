@@ -2,6 +2,12 @@
 Changelog for package ros_ethercat_loop
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.0 (2015-04-07)
+------------------
+* Check if a port has been defined before starting EtherCAT
+* Check if an ethercat port has been defined
+* Enable rpath in ros_ethercat_loop.
+
 0.1.8 (2014-07-18)
 ------------------
 
