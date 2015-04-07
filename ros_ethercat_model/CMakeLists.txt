@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ros_ethercat_model)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS 
+find_package(catkin REQUIRED COMPONENTS
     roscpp
     hardware_interface
     pluginlib
@@ -35,8 +35,18 @@ CATKIN_DEPENDS
     pr2_mechanism_msgs
 INCLUDE_DIRS
     include
+CFG_EXTRAS
+    ${PROJECT_NAME}-extras.cmake
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
+install(PROGRAMS scripts/${PROJECT_NAME}/calibrate
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY launch/
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
