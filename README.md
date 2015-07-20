@@ -1,3 +1,29 @@
+## ros_ethercat (indigo) - 0.3.0-0
+
+The packages in the `ros_ethercat` repository were released into the `indigo` distro by running `/usr/bin/bloom-release ros_ethercat --track indigo --rosdistro indigo` on `Mon, 20 Jul 2015 12:38:11 -0000`
+
+These packages were released:
+- `ros_ethercat`
+- `ros_ethercat_eml`
+- `ros_ethercat_hardware`
+- `ros_ethercat_loop`
+- `ros_ethercat_model`
+
+Version of package(s) in repository `ros_ethercat`:
+- upstream repository: https://github.com/shadow-robot/ros_ethercat.git
+- release repository: https://github.com/shadow-robot/ros_ethercat-release.git
+- rosdistro version: `0.2.0-0`
+- old version: `0.2.0-0`
+- new version: `0.3.0-0`
+
+Versions of tools used:
+- bloom version: `0.5.20`
+- catkin_pkg version: `0.2.8`
+- rosdep version: `0.11.2`
+- rosdistro version: `0.4.2`
+- vcstools version: `0.1.36`
+
+
 ## ros_ethercat (indigo) - 0.2.0-0
 
 The packages in the `ros_ethercat` repository were released into the `indigo` distro by running `/usr/bin/bloom-release --rosdistro indigo --track indigo ros_ethercat` on `Tue, 07 Apr 2015 19:15:39 -0000`
